@@ -9,7 +9,10 @@ import org.pss.pss_solutions.exception.OrderNotFoundException;
 import org.pss.pss_solutions.exception.OrderStatusException;
 import org.pss.pss_solutions.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -19,6 +22,7 @@ import java.util.Set;
 @Service
 public class OrderService {
 
+    private static final Set<String> allowedColumns = Set.of("amount", "createdAt");
     private final OrderRepository orderRepository;
 
     @Autowired
@@ -55,8 +59,10 @@ public class OrderService {
         }
     }
 
-    public List<Order> findOrders(OrderStatus orderStatus, Pageable pageable) {
-        Set<String> allowedColumns = Set.of("amount", "createdAt");
+    public List<Order> findOrders(OrderStatus orderStatus,
+                                  @PageableDefault(size = 10, sort = "createdAt",
+                                          direction = Sort.Direction.DESC)
+                                  Pageable pageable) {
         boolean valid = pageable.getSort().stream()
                 .allMatch(order -> allowedColumns.contains(order.getProperty()));
         if (valid) {

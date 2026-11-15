@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
-@Import(TestcontainersConfiguration.class)
+//@Import(TestcontainersConfiguration.class)
 class PssSolutionsApplicationTests {
 
     @LocalServerPort
@@ -88,6 +88,177 @@ class PssSolutionsApplicationTests {
 
         restTestClient.get().exchange().expectStatus().isOk().expectBody()
                 .jsonPath("$.length()").isEqualTo(2);
+    }
+
+    @Test
+    void findOrdersPageableSortByAmount() {
+        OrderRecord record1 = new OrderRecord("gelu", 69.0);
+        OrderRecord record2 = new OrderRecord("relu", 42.0);
+        OrderRecord record3 = new OrderRecord("mirel", 11.00);
+        OrderRecord record4 = new OrderRecord("petrica", 23.00);
+
+        restTestClient.post()
+                .body(record1).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record2).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record3).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record4).exchange().expectStatus().isCreated().expectBody(Long.class);
+
+        restTestClient.get().uri(uriBuilder -> uriBuilder
+                        .queryParam("page", 0)
+                        .queryParam("size", 2)
+                        .queryParam("sort", "amount")
+                .build()).exchange().expectStatus().isOk().expectBody()
+                .jsonPath("$.length()").isEqualTo(2)
+                .jsonPath("$[0].customerName").isEqualTo("mirel");
+    }
+
+    @Test
+    void findOrdersPageableSortByAmountDesc() {
+        OrderRecord record1 = new OrderRecord("gelu", 69.0);
+        OrderRecord record2 = new OrderRecord("relu", 42.0);
+        OrderRecord record3 = new OrderRecord("mirel", 11.00);
+        OrderRecord record4 = new OrderRecord("petrica", 23.00);
+
+        restTestClient.post()
+                .body(record1).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record2).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record3).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record4).exchange().expectStatus().isCreated().expectBody(Long.class);
+
+        restTestClient.get().uri(uriBuilder -> uriBuilder
+                        .queryParam("page", 0)
+                        .queryParam("size", 2)
+                        .queryParam("sort", "amount,desc")
+                        .build()).exchange().expectStatus().isOk().expectBody()
+                .jsonPath("$.length()").isEqualTo(2)
+                .jsonPath("$[0].customerName").isEqualTo("gelu");
+    }
+
+    @Test
+    void findOrdersPageableSortByCreatedAt() {
+        OrderRecord record1 = new OrderRecord("gelu", 69.0);
+        OrderRecord record2 = new OrderRecord("relu", 42.0);
+        OrderRecord record3 = new OrderRecord("mirel", 11.00);
+        OrderRecord record4 = new OrderRecord("petrica", 23.00);
+
+        restTestClient.post()
+                .body(record1).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record2).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record3).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record4).exchange().expectStatus().isCreated().expectBody(Long.class);
+
+        restTestClient.get().uri(uriBuilder -> uriBuilder
+                        .queryParam("page", 0)
+                        .queryParam("size", 2)
+                        .queryParam("sort", "createdAt")
+                        .build()).exchange().expectStatus().isOk().expectBody()
+                .jsonPath("$.length()").isEqualTo(2)
+                .jsonPath("$[0].customerName").isEqualTo("gelu")
+                .jsonPath("$[1].customerName").isEqualTo("relu");
+    }
+
+    @Test
+    void findOrdersPageableSortByCreatedAtDesc() {
+        OrderRecord record1 = new OrderRecord("gelu", 69.0);
+        OrderRecord record2 = new OrderRecord("relu", 42.0);
+        OrderRecord record3 = new OrderRecord("mirel", 11.00);
+        OrderRecord record4 = new OrderRecord("petrica", 23.00);
+
+        restTestClient.post()
+                .body(record1).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record2).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record3).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record4).exchange().expectStatus().isCreated().expectBody(Long.class);
+
+        restTestClient.get().uri(uriBuilder -> uriBuilder
+                        .queryParam("page", 0)
+                        .queryParam("size", 2)
+                        .queryParam("sort", "createdAt,desc")
+                        .build()).exchange().expectStatus().isOk().expectBody()
+                .jsonPath("$.length()").isEqualTo(2)
+                .jsonPath("$[0].customerName").isEqualTo("petrica")
+                .jsonPath("$[1].customerName").isEqualTo("mirel");
+    }
+
+    @Test
+    void findOrdersPageableInvalidSortBy() {
+        OrderRecord record1 = new OrderRecord("gelu", 69.0);
+        OrderRecord record2 = new OrderRecord("relu", 42.0);
+        OrderRecord record3 = new OrderRecord("mirel", 11.00);
+        OrderRecord record4 = new OrderRecord("petrica", 23.00);
+
+        restTestClient.post()
+                .body(record1).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record2).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record3).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record4).exchange().expectStatus().isCreated().expectBody(Long.class);
+
+        restTestClient.get().uri(uriBuilder -> uriBuilder
+                        .queryParam("page", 0)
+                        .queryParam("size", 2)
+                        .queryParam("sort", "invalid")
+                        .build()).exchange().expectStatus().isBadRequest();
+    }
+
+    @Test
+    void findOrdersPageableInvalidPage() {
+        OrderRecord record1 = new OrderRecord("gelu", 69.0);
+        OrderRecord record2 = new OrderRecord("relu", 42.0);
+        OrderRecord record3 = new OrderRecord("mirel", 11.00);
+        OrderRecord record4 = new OrderRecord("petrica", 23.00);
+
+        restTestClient.post()
+                .body(record1).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record2).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record3).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record4).exchange().expectStatus().isCreated().expectBody(Long.class);
+
+        restTestClient.get().uri(uriBuilder -> uriBuilder
+                        .queryParam("page", -10)
+                        .queryParam("size", 2)
+                        .queryParam("sort", "createdAt")
+                        .build()).exchange().expectStatus().isOk();
+    }
+
+    @Test
+    void findOrdersPageableInvalidPage1() {
+        OrderRecord record1 = new OrderRecord("gelu", 69.0);
+        OrderRecord record2 = new OrderRecord("relu", 42.0);
+        OrderRecord record3 = new OrderRecord("mirel", 11.00);
+        OrderRecord record4 = new OrderRecord("petrica", 23.00);
+
+        restTestClient.post()
+                .body(record1).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record2).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record3).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record4).exchange().expectStatus().isCreated().expectBody(Long.class);
+
+        restTestClient.get().uri(uriBuilder -> uriBuilder
+                        .queryParam("page", 5)
+                        .queryParam("size", 2)
+                        .queryParam("sort", "createdAt")
+                        .build()).exchange().expectStatus().isOk();
     }
 
     @Test
@@ -318,6 +489,96 @@ class PssSolutionsApplicationTests {
                         .queryParam("orderStatus", OrderStatus.COMPLETED)
                         .build((Long)null)).exchange()
                 .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void getTotal() {
+        OrderRecord record1 = new OrderRecord("gelu", 10.0);
+        OrderRecord record2 = new OrderRecord("relu", 10.0);
+        OrderRecord record3 = new OrderRecord("mirel", 10.0);
+        OrderRecord record4 = new OrderRecord("petrica", 10.0);
+
+        restTestClient.post()
+                .body(record1).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record2).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record3).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record4).exchange().expectStatus().isCreated().expectBody(Long.class);
+
+        restTestClient.get().uri(uriBuilder -> uriBuilder
+                .path("/total")
+                .queryParam("orderStatus", OrderStatus.PENDING)
+                .build()).exchange().expectStatus().isOk().expectBody(Double.class).isEqualTo(40.0);
+    }
+
+    @Test
+    void getTotal1() {
+        OrderRecord record1 = new OrderRecord("gelu", 10.0);
+        OrderRecord record2 = new OrderRecord("relu", 10.0);
+        OrderRecord record3 = new OrderRecord("mirel", 10.0);
+        OrderRecord record4 = new OrderRecord("petrica", 10.0);
+
+        Long id1 = restTestClient.post()
+                .body(record1).exchange().expectStatus()
+                .isCreated().expectBody(Long.class).returnResult().getResponseBody();
+        assertNotNull(id1);
+        Long id2 = restTestClient.post()
+                .body(record2).exchange().expectStatus()
+                .isCreated().expectBody(Long.class).returnResult().getResponseBody();
+        assertNotNull(id2);
+        restTestClient.post()
+                .body(record3).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record4).exchange().expectStatus().isCreated().expectBody(Long.class);
+
+        restTestClient.put().uri(uriBuilder -> uriBuilder.path("/{id}")
+                .queryParam("orderStatus", OrderStatus.COMPLETED)
+                .build(id1)).exchange().expectStatus().isOk();
+
+        restTestClient.put().uri(uriBuilder -> uriBuilder.path("/{id}")
+                .queryParam("orderStatus", OrderStatus.COMPLETED)
+                .build(id2)).exchange().expectStatus().isOk();
+
+        restTestClient.get().uri(uriBuilder -> uriBuilder
+                .path("/total")
+                .queryParam("orderStatus", OrderStatus.PENDING)
+                .build()).exchange().expectStatus().isOk().expectBody(Double.class).isEqualTo(20.0);
+    }
+
+    @Test
+    void getTotal2() {
+        OrderRecord record1 = new OrderRecord("gelu", 10.0);
+        OrderRecord record2 = new OrderRecord("relu", 10.0);
+        OrderRecord record3 = new OrderRecord("mirel", 10.0);
+        OrderRecord record4 = new OrderRecord("petrica", 10.0);
+
+        Long id1 = restTestClient.post()
+                .body(record1).exchange().expectStatus()
+                .isCreated().expectBody(Long.class).returnResult().getResponseBody();
+        assertNotNull(id1);
+        Long id2 = restTestClient.post()
+                .body(record2).exchange().expectStatus()
+                .isCreated().expectBody(Long.class).returnResult().getResponseBody();
+        assertNotNull(id2);
+        restTestClient.post()
+                .body(record3).exchange().expectStatus().isCreated().expectBody(Long.class);
+        restTestClient.post()
+                .body(record4).exchange().expectStatus().isCreated().expectBody(Long.class);
+
+        restTestClient.put().uri(uriBuilder -> uriBuilder.path("/{id}")
+                .queryParam("orderStatus", OrderStatus.COMPLETED)
+                .build(id1)).exchange().expectStatus().isOk();
+
+        restTestClient.put().uri(uriBuilder -> uriBuilder.path("/{id}")
+                .queryParam("orderStatus", OrderStatus.COMPLETED)
+                .build(id2)).exchange().expectStatus().isOk();
+
+        restTestClient.get().uri(uriBuilder -> uriBuilder
+                .path("/total")
+                .queryParam("orderStatus", OrderStatus.CANCELLED)
+                .build()).exchange().expectStatus().isOk().expectBody(Double.class).isEqualTo(0.0);
     }
 
     @Test

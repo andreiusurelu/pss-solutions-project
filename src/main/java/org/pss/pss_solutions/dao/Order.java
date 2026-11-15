@@ -81,7 +81,7 @@ public class Order {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Order order = (Order) o;
-        return Objects.equals(id, order.id) && Objects.equals(customerName, order.customerName) && Objects.equals(amount, order.amount) && Objects.equals(createdAt, order.createdAt) && Objects.equals(updatedAt, order.updatedAt);
+        return Objects.equals(customerName, order.customerName) && Objects.equals(amount, order.amount) && Objects.equals(createdAt, order.createdAt) && Objects.equals(updatedAt, order.updatedAt);
     }
 
     @Override
